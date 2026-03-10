@@ -64,7 +64,7 @@ export default function Bookshelves() {
                     {bookshelf.books.map((book, idx) => (
                       <li
                         key={idx}
-                        className="flex flex-col items-center h-[90%] cursor-pointer bg-taupe-100 rounded-lg hover:scale-105 hover:mt-2 hover:mb-2 transition-all duration-300 ease-in-out"
+                        className="flex flex-col items-center h-[90%] cursor-pointer bg-taupe-100 rounded-lg hover:scale-105  transition-all duration-300 ease-in-out"
                         onClick={(e) => {
                           e.stopPropagation();
                           setSelectedBook(book.title);
