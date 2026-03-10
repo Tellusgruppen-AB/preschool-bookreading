@@ -5,6 +5,7 @@
 export type Book = {
   title: string
   author: string
+  image: string
 }
 
 export type Bookshelf = {
@@ -26,28 +27,46 @@ export const columns = [
 ]
 
 export const data: Bookshelf[] = [
-  {
+   {
     id: "1",
-    name: "Djur",
+    name: "Alla",
     books: [
-      { title: "Kaninens äventyr", author: "Anna Andersson" },
-      { title: "Katten i natten", author: "Bosse Berg" },
+      { title: "Kaninens äventyr", author: "Anna Andersson", image: "/kaninens-aventyr.png" },
+      { title: "Katten i natten", author: "Bosse Berg", image: "/katten-i-natten.png" },
+      { title: "Bästa vänner", author: "Cecilia Ceder", image: "/basta-vanner.png" },
+      { title: "Kramkalas", author: "David Dahl", image: "/kramkalas.png" },
+      { title: "Tillsammans", author: "Eva Ek", image: "/tillsammans.png" },
+      { title: "Röd, gul, blå", author: "Fanny Färg", image: "/rod-gul-bla.png" },
+      { title: "Kaninens äventyr", author: "Anna Andersson", image: "/kaninens-aventyr.png" },
+      { title: "Katten i natten", author: "Bosse Berg", image: "/katten-i-natten.png" },
+      { title: "Bästa vänner", author: "Cecilia Ceder", image: "/basta-vanner.png" },
+      { title: "Kramkalas", author: "David Dahl", image: "/kramkalas.png" },
+      { title: "Tillsammans", author: "Eva Ek", image: "/tillsammans.png" },
+      { title: "Röd, gul, blå", author: "Fanny Färg", image: "/rod-gul-bla.png" },
     ],
   },
   {
     id: "2",
-    name: "Vänskap",
+    name: "Djur",
     books: [
-      { title: "Bästa vänner", author: "Cecilia Ceder" },
-      { title: "Kramkalas", author: "David Dahl" },
-      { title: "Tillsammans", author: "Eva Ek" },
+      { title: "Kaninens äventyr", author: "Anna Andersson", image: "/kaninens-aventyr.png" },
+      { title: "Katten i natten", author: "Bosse Berg", image: "/katten-i-natten.png" },
     ],
   },
   {
     id: "3",
+    name: "Vänskap",
+    books: [
+      { title: "Bästa vänner", author: "Cecilia Ceder", image: "/basta-vanner.png" },
+      { title: "Kramkalas", author: "David Dahl", image: "/kramkalas.png" },
+      { title: "Tillsammans", author: "Eva Ek", image: "/tillsammans.png" },
+    ],
+  },
+  {
+    id: "4",
     name: "Färger",
     books: [
-      { title: "Röd, gul, blå", author: "Fanny Färg" },
+      { title: "Röd, gul, blå", author: "Fanny Färg", image: "/rod-gul-bla.png" },
     ],
   },
 ]
