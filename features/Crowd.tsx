@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Tooltip,
   TooltipContent,
@@ -91,10 +92,14 @@ export default function Crowd() {
 
   // Dialog state
   const [showDialog, setShowDialog] = React.useState(false);
-  const [showBokmenyDialog, setShowBokmenyDialog] = React.useState(false);
   const [newQuestion, setNewQuestion] = React.useState("");
   const [selectedRow, setSelectedRow] = React.useState("");
   const [rowError, setRowError] = React.useState(false);
+
+  // Print dialog state
+  const [showPrintDialog, setShowPrintDialog] = React.useState(false);
+  const [printWhat, setPrintWhat] = React.useState<string>("all");
+  const [printHow, setPrintHow] = React.useState<"list" | "cards">("list");
 
   const createNewQuestion = () => {
     setSelectedRow("");
@@ -107,6 +112,202 @@ export default function Crowd() {
     setNewQuestion("");
     setSelectedRow("");
     setRowError(false);
+  };
+
+  const getColorHex = (key: string): string => {
+    switch (key) {
+      case "C":
+        return "#fcd34d";
+      case "R":
+        return "#d4fc79";
+      case "O":
+        return "#7dd3fc";
+      case "W":
+        return "#fbcfe8";
+      case "D":
+        return "#e9d5ff";
+      default:
+        return "#f0f0f0";
+    }
+  };
+
+  const handlePrint = () => {
+    const isCardFormat = printHow === "cards";
+    const printContent = document.createElement("div");
+
+    let htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>CROWD-frågor${title ? ` - ${title}` : ""}</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              padding: 20px;
+              color: #333;
+              background-color: #f5f5f5;
+            }
+            h1 {
+              font-size: 24px;
+            }
+            .book-title {
+              font-size: 16px;
+              color: #666;
+              margin-bottom: 50px;
+            }
+            ${
+              isCardFormat
+                ? `
+            .cards-container {
+              display: grid;
+              grid-template-columns: repeat(3, 1fr);
+              gap: 15px;
+              margin-top: 20px;
+            }
+            .card {
+              padding: 15px;
+              border-radius: 8px;
+              box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+              page-break-inside: avoid;
+              line-height: 1.6;
+              font-size: 14px;
+              print-color-adjust: exact;
+              -webkit-print-color-adjust: exact;
+            }
+            .card-category {
+              font-weight: bold;
+              font-size: 16px;
+              margin-bottom: 8px;
+            }
+            @media (max-width: 800px) {
+              .cards-container {
+                grid-template-columns: repeat(2, 1fr);
+              }
+            }
+            @media print {
+              body {
+                background-color: white;
+              }
+              .cards-container {
+                grid-template-columns: repeat(3, 1fr);
+              }
+            }
+            `
+                : `
+            .category {
+              margin-bottom: 25px;
+              page-break-inside: avoid;
+            }
+            .category-header {
+              font-size: 18px;
+              font-weight: bold;
+              margin-bottom: 12px;
+              padding-bottom: 8px;
+              border-bottom: 2px solid #333;
+            }
+            .question {
+              margin-left: 20px;
+              margin-bottom: 8px;
+              line-height: 1.6;
+            }
+            .question:before {
+              content: "• ";
+              font-weight: bold;
+            }
+            @media print {
+              body {
+                padding: 0;
+              }
+            }
+            `
+            }
+          </style>
+        </head>
+        <body>
+          <h1>CROWD-frågor</h1>
+          ${title ? `<p class="book-title">Bok: ${title}</p>` : ""}
+    `;
+
+    if (isCardFormat) {
+      if (printWhat === "all") {
+        crowdRows.forEach((row) => {
+          htmlContent += `
+            <div class="category-section">
+              <h2 style="font-size: 18px; font-weight: bold; margin-top: 20px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #333;">
+                <span style="font-size: 20px;">${row.key}</span> ${row.label}
+              </h2>
+              <div class="cards-container">
+                ${row.questions
+                  .map(
+                    (question) => `
+                  <div class="card" style="background-color: ${getColorHex(row.key)};">
+                    <div>${question}</div>
+                  </div>
+                `,
+                  )
+                  .join("")}
+              </div>
+            </div>
+          `;
+        });
+      } else {
+        const selectedIdx = parseInt(printWhat?.replace("row-", "") || "0");
+        const selectedRow = crowdRows[selectedIdx];
+        htmlContent += `
+          <div class="category-section">
+            <h2 style="font-size: 18px; font-weight: bold; margin-top: 20px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #333;">
+              <span style="font-size: 20px;">${selectedRow.key}</span> ${selectedRow.label}
+            </h2>
+            <div class="cards-container">
+              ${selectedRow.questions
+                .map(
+                  (question) => `
+                <div class="card" style="background-color: ${getColorHex(selectedRow.key)};">
+                  <div>${question}</div>
+                </div>
+              `,
+                )
+                .join("")}
+            </div>
+          </div>
+        `;
+      }
+    } else {
+      // List format
+      if (printWhat === "all") {
+        htmlContent += crowdRows
+          .map(
+            (row) => `
+          <div class="category">
+            <div class="category-header"><span style="font-size: 20px;">${row.key}</span> ${row.label}</div>
+            ${row.questions.map((q) => `<div class="question">${q}</div>`).join("")}
+          </div>
+          `,
+          )
+          .join("");
+      } else {
+        const selectedIdx = parseInt(printWhat?.replace("row-", "") || "0");
+        const selectedRow = crowdRows[selectedIdx];
+        htmlContent += `
+          <div class="category">
+            <div class="category-header"><span style="font-size: 20px;">${selectedRow.key}</span> ${selectedRow.label}</div>
+            ${selectedRow.questions.map((q) => `<div class="question">${q}</div>`).join("")}
+          </div>
+        `;
+      }
+    }
+
+    htmlContent += `
+        </body>
+      </html>
+    `;
+
+    const printWindow = window.open("", "_blank");
+    if (printWindow) {
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+      printWindow.print();
+    }
   };
 
   // Stäng tooltipen när användaren skriver eller väljer rubrik
@@ -148,13 +349,9 @@ export default function Crowd() {
   return (
     <div className="flex flex-col justify-center items-center w-full">
       <Link href="/" className="self-start">
-      <Button
-        variant="ghost"
-        className="ml-4 mt-4 cursor-pointer"
-      
-      >
-        <ArrowLeft /> Bokhyllor
-      </Button>
+        <Button variant="ghost" className="ml-4 mt-4 cursor-pointer">
+          <ArrowLeft /> Bokhyllor
+        </Button>
       </Link>
       <div className="flex justify-between w-full mb-5 px-[20%]">
         <div>
@@ -169,14 +366,14 @@ export default function Crowd() {
             className="cursor-pointer"
             onClick={createNewQuestion}
           >
-            Skriv ny fråga
+            Skapa ny fråga
           </Button>
           <Button
             variant="outline"
             className="cursor-pointer"
-            onClick={() => setShowBokmenyDialog(true)}
+            onClick={() => setShowPrintDialog(true)}
           >
-            Bokmeny
+            Skriv ut
           </Button>
         </div>
       </div>
@@ -307,19 +504,89 @@ export default function Crowd() {
         </TooltipProvider>
       )}
 
-      {showBokmenyDialog && (
+      {/* Dialog/modal för utskrift */}
+      {showPrintDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-          <div className="bg-white rounded-lg shadow-lg p-8 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">{title}</h2>
-              <button 
-                onClick={() => setShowBokmenyDialog(false)}
-                className="text-gray-500 hover:text-gray-700 text-2xl cursor-pointer"
-              >
-                ×
-              </button>
+          <div className="bg-white rounded-lg shadow-lg p-12 flex flex-col gap-6 min-w-105 max-w-[90vw] w-120">
+            <div>
+              <h2 className="font-semibold text-lg">Skriv ut CROWD-frågor</h2>
             </div>
-            <BookMenu bookTitle={title || undefined} />
+
+            {/* Format section - at top */}
+            <div>
+              <div className="flex gap-3">
+                <Button
+                  onClick={() => setPrintHow("list")}
+                  variant={printHow === "list" ? "default" : "outline"}
+                  className={`flex-1 cursor-pointer ${
+                    printHow === "list"
+                      ? "bg-blue-500 hover:bg-blue-600 text-white"
+                      : ""
+                  }`}
+                >
+                  Lista
+                </Button>
+                <Button
+                  onClick={() => setPrintHow("cards")}
+                  variant={printHow === "cards" ? "default" : "outline"}
+                  className={`flex-1 cursor-pointer ${
+                    printHow === "cards"
+                      ? "bg-purple-500 hover:bg-purple-600 text-white"
+                      : ""
+                  }`}
+                >
+                  Kort
+                </Button>
+              </div>
+            </div>
+
+            {/* Categories section - below */}
+            <div>
+
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-3 cursor-pointer" onClick={() => setPrintWhat("all")}>
+                  <Checkbox
+                    checked={printWhat === "all"}
+                    onCheckedChange={() => setPrintWhat("all")}
+                  />
+                  <span>Alla kategorier</span>
+                </div>
+                {crowdRows.map((row, idx) => (
+                  <div
+                    key={row.key}
+                    className="flex items-center gap-3 cursor-pointer"
+                    onClick={() => setPrintWhat(`row-${idx}`)}
+                  >
+                    <Checkbox
+                      checked={printWhat === `row-${idx}`}
+                      onCheckedChange={() => setPrintWhat(`row-${idx}`)}
+                    />
+                    <span>
+                      <span className="font-bold">{row.key}</span> - {row.label}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex gap-2 justify-end mt-4">
+              <Button
+                variant="ghost"
+                onClick={() => setShowPrintDialog(false)}
+                className="cursor-pointer"
+              >
+                Avbryt
+              </Button>
+              <Button
+                variant="default"
+                onClick={() => {
+                  handlePrint();
+                  setShowPrintDialog(false);
+                }}
+                className="cursor-pointer"
+              >
+                Skriv ut
+              </Button>
+            </div>
           </div>
         </div>
       )}
