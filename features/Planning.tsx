@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,14 @@ import { ArrowLeft, Printer, Edit, Trash2 } from "lucide-react";
 import Link from "next/link";
 
 export default function Planning() {
+  return (
+    <Suspense fallback={<div className="p-4">Loading...</div>}>
+      <PlanningContent />
+    </Suspense>
+  );
+}
+
+function PlanningContent() {
   const searchParams = useSearchParams();
   const title = searchParams.get("title");
   const author = searchParams.get("author");

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Palette } from "lucide-react";
@@ -9,6 +9,14 @@ import BookMenu from "./BookMenu";
 import Link from "next/link";
 
 export default function TargetWords() {
+  return (
+    <Suspense fallback={<div className="p-4">Loading...</div>}>
+      <TargetWordsContent />
+    </Suspense>
+  );
+}
+
+function TargetWordsContent() {
   const searchParams = useSearchParams();
   const title = searchParams.get("title");
 

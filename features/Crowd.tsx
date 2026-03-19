@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
 import Link from "next/link";
@@ -22,6 +22,14 @@ import {
 import BookMenu from "./BookMenu";
 
 export default function Crowd() {
+  return (
+    <Suspense fallback={<div className="p-4">Loading...</div>}>
+      <CrowdContent />
+    </Suspense>
+  );
+}
+
+function CrowdContent() {
   const searchParams = useSearchParams();
   const title = searchParams.get("title");
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
@@ -12,6 +12,14 @@ interface BookMenuProps {
 }
 
 export default function BookMenu({ bookTitle, bookAuthor }: BookMenuProps) {
+  return (
+    <Suspense fallback={<div className="p-4">Loading...</div>}>
+      <BookMenuContent bookTitle={bookTitle} bookAuthor={bookAuthor} />
+    </Suspense>
+  );
+}
+
+function BookMenuContent({ bookTitle, bookAuthor }: BookMenuProps) {
   const searchParams = useSearchParams();
   const title = bookTitle || searchParams.get('title');
   const author = bookAuthor || searchParams.get('author');
